@@ -93,7 +93,7 @@ REST_FRAMEWORK = {
     ],
 
     'DEFAULT_AUTHENTICATION_CLASSES': [
-            'rest_framework_simplejwt.authentication.JWTAuthentication',  # noqa
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  # noqa
     ],
 }
 
