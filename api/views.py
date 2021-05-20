@@ -5,7 +5,7 @@ from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.viewsets import ModelViewSet
 
-from .models import Follow, Group, Post, User
+from .models import Group, Post, User
 from .permissions import IsOwnerOrReadOnly
 from .serializers import (CommentSerializer, FollowSerializer, GroupSerializer,
                           PostSerializer)
@@ -22,7 +22,7 @@ class PostViewSet(ModelViewSet):
     """Проверяем доступность всех публикаций для всех пользователей."""
     serializer_class = PostSerializer
     queryset = Post.objects.all()
-    permission_classes = [IsOwnerOrReadOnly, IsAuthenticatedOrReadOnly]
+    permission_classes = (IsOwnerOrReadOnly, IsAuthenticatedOrReadOnly)
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('group',)
 
@@ -33,7 +33,7 @@ class PostViewSet(ModelViewSet):
 class CommentViewSet(ModelViewSet):
     """Проверяем доступность всех комментариев для всех пользователей."""
     serializer_class = CommentSerializer
-    permission_classes = [IsOwnerOrReadOnly, IsAuthenticatedOrReadOnly]
+    permission_classes = (IsOwnerOrReadOnly, IsAuthenticatedOrReadOnly)
 
     def perform_create(self, serializer):
         post = get_object_or_404(Post, id=self.kwargs.get('id'))
@@ -48,7 +48,7 @@ class GroupViewSet(CustomViewSet):
     """Получаем список всех групп."""
     serializer_class = GroupSerializer
     queryset = Group.objects.all()
-    permission_classes = [IsOwnerOrReadOnly, IsAuthenticatedOrReadOnly]
+    permission_classes = (IsOwnerOrReadOnly, IsAuthenticatedOrReadOnly)
 
 
 class FollowViewSet(CustomViewSet):
@@ -58,5 +58,8 @@ class FollowViewSet(CustomViewSet):
     search_fields = ['user__username', 'following__username']
 
     def get_queryset(self):
-        get_object_or_404(User, id=self.request.user.pk)
-        return Follow.objects.filter(following=self.request.user)
+        user = get_object_or_404(User, id=self.request.user.pk)
+        return user.following.all()
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
